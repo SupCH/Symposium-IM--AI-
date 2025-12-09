@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, BookOpen, MoreHorizontal, FileText, Paperclip, Send, MessageSquare, Bot, LogOut, Users } from 'lucide-react';
+import { Search, BookOpen, MoreHorizontal, FileText, Paperclip, Send, MessageSquare, Bot, LogOut, Users, Plus } from 'lucide-react';
 import { useAuthStore, useChatStore, useFriendsStore } from '../store';
 import { conversationsAPI, friendsAPI, aiAPI } from '../services/api';
 import { connectSocket, disconnectSocket, sendMessage, sendTyping } from '../socket';
@@ -180,7 +180,23 @@ export default function Chat() {
                     ))}
 
                     {/* 会话列表 */}
-                    <div className="section-title" style={{ marginTop: '1rem' }}>最近会话</div>
+                    <div className="section-title" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>最近会话</span>
+                        <button
+                            onClick={() => navigate('/create-group')}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '2px',
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}
+                            title="创建群组"
+                        >
+                            <Plus style={{ width: '14px', height: '14px', color: 'var(--text-muted)' }} />
+                        </button>
+                    </div>
                     {conversations.length === 0 ? (
                         <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem', fontStyle: 'italic' }}>
                             暂无会话记录
