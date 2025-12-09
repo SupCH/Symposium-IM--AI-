@@ -157,6 +157,31 @@ async function createPresetAIUsers() {
       console.log(`✓ Created AI user: ${aiUser.nickname}`);
     }
   }
+
+  // 创建管理员账号
+  await createAdminUser();
+}
+
+/**
+ * 创建管理员账号
+ */
+async function createAdminUser() {
+  const bcrypt = await import('bcryptjs');
+
+  const stmt = db.prepare('SELECT id FROM users WHERE username = ?');
+  stmt.bind(['admin']);
+  const exists = stmt.step();
+  stmt.free();
+
+  if (!exists) {
+    const passwordHash = bcrypt.default.hashSync('admin123', 10);
+    db.run(
+      `INSERT INTO users (username, email, password_hash, nickname, avatar, status, is_ai)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      ['admin', 'admin@symposium.local', passwordHash, 'Administrator', '/default-avatar.png', 'offline', 0]
+    );
+    console.log('✓ Created admin user: admin / admin123');
+  }
 }
 
 /**

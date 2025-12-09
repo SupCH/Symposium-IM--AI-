@@ -30,7 +30,7 @@ export default function Register() {
             login(response.data.user, response.data.token);
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
+            setError(err.response?.data?.message || '注册失败，请稍后重试');
         } finally {
             setLoading(false);
         }
@@ -39,67 +39,67 @@ export default function Register() {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h1>Symposium</h1>
-                <p className="subtitle">Join the Academic Discourse</p>
+                <h1>学术论坛</h1>
+                <p className="subtitle">加入学术交流社区</p>
 
                 {error && <div className="error-message">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>Username</label>
+                        <label>用户名</label>
                         <input
                             type="text"
                             name="username"
                             value={formData.username}
                             onChange={handleChange}
-                            placeholder="Choose a username"
+                            placeholder="请输入用户名"
                             required
                         />
                     </div>
 
                     <div className="form-group">
-                        <label>Email</label>
+                        <label>邮箱</label>
                         <input
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            placeholder="Your email address"
+                            placeholder="请输入邮箱地址"
                             required
                         />
                     </div>
 
                     <div className="form-group">
-                        <label>Display Name</label>
+                        <label>昵称</label>
                         <input
                             type="text"
                             name="nickname"
                             value={formData.nickname}
                             onChange={handleChange}
-                            placeholder="How others see you (optional)"
+                            placeholder="显示给其他用户的名称（可选）"
                         />
                     </div>
 
                     <div className="form-group">
-                        <label>Password</label>
+                        <label>密码</label>
                         <input
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            placeholder="Choose a secure password"
+                            placeholder="请设置密码（至少6位）"
                             required
                             minLength={6}
                         />
                     </div>
 
                     <button type="submit" className="submit-btn" disabled={loading}>
-                        {loading ? 'Creating Account...' : 'Register'}
+                        {loading ? '注册中...' : '注 册'}
                     </button>
                 </form>
 
                 <p className="switch-link">
-                    Already a Member? <Link to="/login">Sign In</Link>
+                    已有账号？<Link to="/login">立即登录</Link>
                 </p>
             </div>
         </div>

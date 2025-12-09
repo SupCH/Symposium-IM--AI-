@@ -22,7 +22,7 @@ export default function Login() {
             login(response.data.user, response.data.token);
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || 'Login failed');
+            setError(err.response?.data?.message || '登录失败，请检查账号密码');
         } finally {
             setLoading(false);
         }
@@ -31,41 +31,41 @@ export default function Login() {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h1>Symposium</h1>
-                <p className="subtitle">Instant Discourse System</p>
+                <h1>学术论坛</h1>
+                <p className="subtitle">即时学术交流系统</p>
 
                 {error && <div className="error-message">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>Username or Email</label>
+                        <label>用户名或邮箱</label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Enter your username"
+                            placeholder="请输入用户名"
                             required
                         />
                     </div>
 
                     <div className="form-group">
-                        <label>Password</label>
+                        <label>密码</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter your password"
+                            placeholder="请输入密码"
                             required
                         />
                     </div>
 
                     <button type="submit" className="submit-btn" disabled={loading}>
-                        {loading ? 'Authenticating...' : 'Enter'}
+                        {loading ? '登录中...' : '登 录'}
                     </button>
                 </form>
 
                 <p className="switch-link">
-                    New Scholar? <Link to="/register">Register Here</Link>
+                    还没有账号？<Link to="/register">立即注册</Link>
                 </p>
             </div>
         </div>
