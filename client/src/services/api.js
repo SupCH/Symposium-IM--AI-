@@ -84,4 +84,10 @@ export const filesAPI = {
     }
 };
 
+// AI API
+export const aiAPI = {
+    getUsers: () => api.get('/ai/users'),
+    startChat: (aiUserId) => api.post(`/ai/start-chat/${aiUserId}`)
+};
+
 export default api;

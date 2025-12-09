@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, BookOpen, PenTool, MoreHorizontal, FileText, Paperclip, Send, MessageSquare } from 'lucide-react';
+import { Search, BookOpen, PenTool, MoreHorizontal, FileText, Paperclip, Send, MessageSquare, Bot } from 'lucide-react';
 import { useAuthStore, useChatStore, useFriendsStore } from '../store';
-import { conversationsAPI, friendsAPI } from '../services/api';
+import { conversationsAPI, friendsAPI, aiAPI } from '../services/api';
 import { connectSocket, disconnectSocket, sendMessage, sendTyping } from '../socket';
 
 export default function Chat() {
     const [inputText, setInputText] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [aiUsers, setAiUsers] = useState([]);
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
 
@@ -24,6 +25,7 @@ export default function Chat() {
         connectSocket();
         loadConversations();
         loadFriends();
+        loadAIUsers();
 
         return () => {
             disconnectSocket();
@@ -53,6 +55,15 @@ export default function Chat() {
         }
     };
 
+    const loadAIUsers = async () => {
+        try {
+            const response = await aiAPI.getUsers();
+            setAiUsers(response.data.aiUsers);
+        } catch (err) {
+            console.error('Failed to load AI users:', err);
+        }
+    };
+
     const loadMessages = async (conversationId) => {
         try {
             const response = await conversationsAPI.getMessages(conversationId);
@@ -66,6 +77,17 @@ export default function Chat() {
         setActiveConversation(conversationId);
         if (!messages[conversationId]) {
             loadMessages(conversationId);
+        }
+    };
+
+    const handleStartAIChat = async (aiUserId) => {
+        try {
+            const response = await aiAPI.startChat(aiUserId);
+            const { conversationId } = response.data;
+            await loadConversations();
+            handleSelectConversation(conversationId);
+        } catch (err) {
+            console.error('Failed to start AI chat:', err);
         }
     };
 
@@ -101,6 +123,9 @@ export default function Chat() {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    // 检查当前对话是否是 AI 对话
+    const isAIConversation = activeConversation?.participant?.is_ai === 1;
+
     return (
         <div className="app-container">
             {/* Sidebar */}
@@ -124,9 +149,38 @@ export default function Chat() {
                     </div>
                 </div>
 
-                {/* Conversations */}
+                {/* AI Users Section */}
                 <div className="conversation-list">
-                    <div className="section-title">Active Fellows</div>
+                    <div className="section-title">
+                        <Bot style={{ width: '12px', height: '12px', display: 'inline', marginRight: '4px' }} />
+                        AI Assistants
+                    </div>
+                    {aiUsers.map(ai => (
+                        <div
+                            key={ai.id}
+                            className="conversation-item"
+                            onClick={() => handleStartAIChat(ai.id)}
+                        >
+                            <div className="header">
+                                <span className="name">
+                                    {ai.nickname}
+                                    <span style={{
+                                        marginLeft: '6px',
+                                        padding: '2px 6px',
+                                        background: '#8b0000',
+                                        color: '#fff',
+                                        fontSize: '0.6rem',
+                                        fontWeight: 'bold',
+                                        borderRadius: '2px'
+                                    }}>AI</span>
+                                </span>
+                            </div>
+                            <div className="title">Always Online</div>
+                        </div>
+                    ))}
+
+                    {/* Conversations */}
+                    <div className="section-title" style={{ marginTop: '1rem' }}>Active Fellows</div>
                     {conversations.length === 0 ? (
                         <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem', fontStyle: 'italic' }}>
                             No conversations yet
@@ -139,7 +193,20 @@ export default function Chat() {
                                 onClick={() => handleSelectConversation(conv.id)}
                             >
                                 <div className="header">
-                                    <span className="name">{conv.name || conv.participant?.nickname || 'Unknown'}</span>
+                                    <span className="name">
+                                        {conv.name || conv.participant?.nickname || 'Unknown'}
+                                        {conv.participant?.is_ai === 1 && (
+                                            <span style={{
+                                                marginLeft: '6px',
+                                                padding: '2px 6px',
+                                                background: '#8b0000',
+                                                color: '#fff',
+                                                fontSize: '0.6rem',
+                                                fontWeight: 'bold',
+                                                borderRadius: '2px'
+                                            }}>AI</span>
+                                        )}
+                                    </span>
                                     <span className="time">{conv.last_message_time ? formatTime(conv.last_message_time) : ''}</span>
                                 </div>
                                 <div className="title">
@@ -180,10 +247,22 @@ export default function Chat() {
                                 <h2>
                                     <span className="symbol">§</span>
                                     {activeConversation.name || activeConversation.participant?.nickname || 'Unknown'}
+                                    {isAIConversation && (
+                                        <span style={{
+                                            marginLeft: '10px',
+                                            padding: '4px 10px',
+                                            background: '#8b0000',
+                                            color: '#fff',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 'bold',
+                                            borderRadius: '3px',
+                                            verticalAlign: 'middle'
+                                        }}>AI</span>
+                                    )}
                                 </h2>
                                 <div className="status">
                                     <BookOpen style={{ width: '12px', height: '12px' }} />
-                                    Status: <span>{activeConversation.participant?.status || 'In Discussion'}</span>
+                                    Status: <span>{isAIConversation ? 'AI Assistant' : (activeConversation.participant?.status || 'In Discussion')}</span>
                                 </div>
                             </div>
                             <div className="actions">
@@ -205,6 +284,9 @@ export default function Chat() {
                                         className={`message ${msg.sender_id === user?.id ? 'sent' : 'received'}`}
                                     >
                                         <div className="meta">
+                                            {msg.is_ai === 1 && (
+                                                <span style={{ color: '#8b0000', fontWeight: 'bold' }}>[AI]</span>
+                                            )}
                                             <span>Ref. {msg.id}</span>
                                             <span>•</span>
                                             <span>{formatTime(msg.created_at)}</span>
@@ -246,14 +328,14 @@ export default function Chat() {
                                             accept="image/*"
                                         />
                                         <div className="spacer"></div>
-                                        <span className="mode">Latex Mode: OFF</span>
+                                        <span className="mode">{isAIConversation ? 'AI Mode: ON' : 'Latex Mode: OFF'}</span>
                                     </div>
 
                                     <textarea
                                         value={inputText}
                                         onChange={handleInputChange}
                                         onKeyPress={handleKeyPress}
-                                        placeholder="在此输入您的论点..."
+                                        placeholder={isAIConversation ? "向 AI 助手提问..." : "在此输入您的论点..."}
                                     />
 
                                     <div className="input-footer">
@@ -270,7 +352,10 @@ export default function Chat() {
                                 </div>
 
                                 <p className="input-disclaimer">
-                                    All communications are encrypted and archived for peer review.
+                                    {isAIConversation
+                                        ? 'AI responses are generated by DEEPSEEK. Use with discretion.'
+                                        : 'All communications are encrypted and archived for peer review.'
+                                    }
                                 </p>
                             </div>
                         </footer>
@@ -279,7 +364,7 @@ export default function Chat() {
                     <div className="empty-state">
                         <MessageSquare className="icon" style={{ width: '64px', height: '64px' }} />
                         <h3>Select a Conversation</h3>
-                        <p>Choose a fellow from the sidebar to begin discourse</p>
+                        <p>Choose a fellow or AI assistant from the sidebar to begin discourse</p>
                     </div>
                 )}
             </div>

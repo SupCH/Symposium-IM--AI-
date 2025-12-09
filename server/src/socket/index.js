@@ -1,5 +1,6 @@
 import { db } from '../db/index.js';
 import { verifyToken } from '../middleware/auth.js';
+import { getAIResponse, getConversationContext } from '../services/ai.js';
 
 // 在线用户映射: userId -> socketId
 const onlineUsers = new Map();
@@ -52,7 +53,7 @@ export function setupSocket(io) {
         /**
          * 发送消息
          */
-        socket.on('send_message', (data) => {
+        socket.on('send_message', async (data) => {
             const { conversationId, content, type = 'text' } = data;
 
             try {
@@ -66,7 +67,7 @@ export function setupSocket(io) {
 
                 // 获取完整消息信息
                 const message = db.prepare(`
-          SELECT m.*, u.username, u.nickname, u.avatar
+          SELECT m.*, u.username, u.nickname, u.avatar, u.is_ai
           FROM messages m
           JOIN users u ON m.sender_id = u.id
           WHERE m.id = ?
@@ -74,6 +75,9 @@ export function setupSocket(io) {
 
                 // 广播给会话中的所有成员
                 io.to(`conversation:${conversationId}`).emit('new_message', message);
+
+                // 检查是否需要 AI 回复
+                await checkAndSendAIReply(io, conversationId, socket.userId);
 
             } catch (error) {
                 console.error('Send message error:', error);
@@ -144,6 +148,64 @@ export function setupSocket(io) {
             notifyFriendsStatusChange(io, socket.userId, 'offline');
         });
     });
+}
+
+/**
+ * 检查并发送 AI 回复
+ */
+async function checkAndSendAIReply(io, conversationId, senderUserId) {
+    try {
+        // 获取会话成员中的 AI 用户
+        const aiMember = db.prepare(`
+      SELECT u.id, u.username, u.nickname, u.avatar, u.ai_prompt
+      FROM conversation_members cm
+      JOIN users u ON cm.user_id = u.id
+      WHERE cm.conversation_id = ? AND u.is_ai = 1 AND u.id != ?
+    `).get(conversationId, senderUserId);
+
+        if (!aiMember) return; // 没有 AI 成员
+
+        // 获取对话上下文
+        const context = getConversationContext(db, conversationId, aiMember.id);
+
+        // 发送"正在输入"提示
+        io.to(`conversation:${conversationId}`).emit('typing', {
+            userId: aiMember.id,
+            username: aiMember.nickname,
+            conversationId
+        });
+
+        // 调用 AI API
+        const aiResponse = await getAIResponse(aiMember.ai_prompt, context);
+
+        // 停止"正在输入"提示
+        io.to(`conversation:${conversationId}`).emit('stop_typing', {
+            userId: aiMember.id,
+            conversationId
+        });
+
+        // 保存 AI 回复到数据库
+        const result = db.prepare(`
+      INSERT INTO messages (conversation_id, sender_id, type, content)
+      VALUES (?, ?, 'text', ?)
+    `).run(conversationId, aiMember.id, aiResponse);
+
+        const messageId = result.lastInsertRowid;
+
+        // 获取完整消息信息
+        const message = db.prepare(`
+      SELECT m.*, u.username, u.nickname, u.avatar, u.is_ai
+      FROM messages m
+      JOIN users u ON m.sender_id = u.id
+      WHERE m.id = ?
+    `).get(messageId);
+
+        // 广播 AI 回复
+        io.to(`conversation:${conversationId}`).emit('new_message', message);
+
+    } catch (error) {
+        console.error('AI reply error:', error);
+    }
 }
 
 /**

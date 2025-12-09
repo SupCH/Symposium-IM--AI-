@@ -41,6 +41,8 @@ async function initDatabase() {
       avatar TEXT DEFAULT '/default-avatar.png',
       nickname TEXT,
       status TEXT DEFAULT 'offline',
+      is_ai INTEGER DEFAULT 0,
+      ai_prompt TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -102,10 +104,59 @@ async function initDatabase() {
   db.run(`CREATE INDEX IF NOT EXISTS idx_friendships_user ON friendships(user_id)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_friendships_friend ON friendships(friend_id)`);
 
+  // 创建预设 AI 用户
+  await createPresetAIUsers();
+
   // 保存数据库
   saveDatabase();
 
   console.log('✓ Database initialized successfully');
+}
+
+/**
+ * 创建预设 AI 用户
+ */
+async function createPresetAIUsers() {
+  const aiUsers = [
+    {
+      username: 'academic_assistant',
+      email: 'academic@ai.symposium',
+      nickname: '学术助手',
+      avatar: '/ai-academic.png',
+      ai_prompt: '你是一位专业的学术助手，擅长论文写作、文献引用、学术讨论。请用专业但友好的语气回复，可以使用中英文。回复要简洁有深度。'
+    },
+    {
+      username: 'chat_buddy',
+      email: 'buddy@ai.symposium',
+      nickname: '闲聊伙伴',
+      avatar: '/ai-buddy.png',
+      ai_prompt: '你是一位友善的聊天伙伴，性格开朗幽默。请用轻松愉快的语气聊天，可以开玩笑，分享有趣的话题。回复要自然亲切。'
+    },
+    {
+      username: 'tech_advisor',
+      email: 'tech@ai.symposium',
+      nickname: '技术顾问',
+      avatar: '/ai-tech.png',
+      ai_prompt: '你是一位资深技术顾问，精通编程、软件开发、系统架构。请用专业的技术语言回答问题，提供代码示例时要清晰规范。'
+    }
+  ];
+
+  for (const aiUser of aiUsers) {
+    // 检查是否已存在
+    const stmt = db.prepare('SELECT id FROM users WHERE username = ?');
+    stmt.bind([aiUser.username]);
+    const exists = stmt.step();
+    stmt.free();
+
+    if (!exists) {
+      db.run(
+        `INSERT INTO users (username, email, password_hash, nickname, avatar, status, is_ai, ai_prompt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [aiUser.username, aiUser.email, 'AI_NO_PASSWORD', aiUser.nickname, aiUser.avatar, 'online', 1, aiUser.ai_prompt]
+      );
+      console.log(`✓ Created AI user: ${aiUser.nickname}`);
+    }
+  }
 }
 
 /**

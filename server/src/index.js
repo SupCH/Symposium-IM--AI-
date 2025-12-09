@@ -12,6 +12,7 @@ import userRoutes from './routes/users.js';
 import friendRoutes from './routes/friends.js';
 import conversationRoutes from './routes/conversations.js';
 import fileRoutes from './routes/files.js';
+import aiRoutes from './routes/ai.js';
 import { setupSocket } from './socket/index.js';
 
 // 配置
@@ -49,6 +50,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/files', fileRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 健康检查
 app.get('/api/health', (req, res) => {
