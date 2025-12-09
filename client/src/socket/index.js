@@ -11,7 +11,7 @@ export function connectSocket() {
 
     if (!token || socket?.connected) return;
 
-    socket = io('http://localhost:3000', {
+    socket = io('http://localhost:50001', {
         auth: { token }
     });
 

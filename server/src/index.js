@@ -18,7 +18,7 @@ import { setupSocket } from './socket/index.js';
 // 配置
 dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 50001;
 
 // 初始化 Express
 const app = express();
@@ -27,7 +27,7 @@ const httpServer = createServer(app);
 // 初始化 Socket.IO
 const io = new Server(httpServer, {
     cors: {
-        origin: ['http://localhost:5173', 'http://localhost:3000'],
+        origin: ['http://localhost:30001', 'http://localhost:50001'],
         methods: ['GET', 'POST'],
         credentials: true
     }
@@ -35,7 +35,7 @@ const io = new Server(httpServer, {
 
 // 中间件
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: ['http://localhost:30001', 'http://localhost:50001'],
     credentials: true
 }));
 app.use(express.json());

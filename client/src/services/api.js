@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../store';
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'http://localhost:50001/api';
 
 // 创建 axios 实例
 const api = axios.create({

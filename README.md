@@ -1,17 +1,16 @@
 # Symposium IM
 
-![Version](https://img.shields.io/badge/version-0.0.2-blue)
+![Version](https://img.shields.io/badge/version-0.0.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
 ![React](https://img.shields.io/badge/react-19.x-61dafb)
 
 一个基于 React + Node.js + SQLite 的即时通讯系统，采用学术论文风格的 UI 设计。
 
-## ✨ 新功能 (v0.0.2)
+## ✨ 新功能 (v0.0.3)
 
-- 🤖 **AI 用户功能**：集成 DEEPSEEK API，支持智能对话
-- 📚 预设 AI 角色：学术助手、闲聊伙伴、技术顾问
-- 🏷️ AI 用户标识：[AI] 徽章显示
+- 🚀 **一键启动**：双击 `start.bat` 即可启动前后端
+- 🔧 **端口调整**：前端 30001，后端 50001
 
 ## 技术栈
 
@@ -23,59 +22,42 @@
 
 ## 快速开始
 
-### 安装依赖
+### 一键启动
 
 ```bash
-# 前端
+# Windows 用户只需双击
+start.bat
+```
+
+### 手动启动
+
+```bash
+# 安装依赖
 cd client && npm install
+cd ../server && npm install
 
-# 后端
-cd server && npm install
-```
-
-### 配置环境变量
-
-```bash
-# 复制环境变量模板
+# 配置环境变量
 cp server/.env.example server/.env
+# 编辑 .env 设置 JWT_SECRET 和 DEEPSEEK_API_KEY
 
-# 编辑 .env 文件设置:
-# - JWT_SECRET: JWT 密钥
-# - DEEPSEEK_API_KEY: DEEPSEEK API 密钥
-# - DEEPSEEK_API_URL: API 地址（可自定义）
-```
-
-### 运行开发服务器
-
-```bash
-# 后端 (端口 3000)
+# 启动后端 (端口 50001)
 cd server && npm run dev
 
-# 前端 (端口 5173)
+# 启动前端 (端口 30001)
 cd client && npm run dev
 ```
+
+### 访问地址
+
+- 前端：http://localhost:30001
+- 后端：http://localhost:50001
 
 ## 项目结构
 
 ```
-├── client/          # React 前端
-│   ├── src/
-│   │   ├── pages/       # 页面组件
-│   │   ├── store/       # Zustand状态管理
-│   │   ├── services/    # API服务
-│   │   └── socket/      # WebSocket客户端
-│   └── package.json
-│
-├── server/          # Node.js 后端
-│   ├── src/
-│   │   ├── routes/      # API路由
-│   │   ├── middleware/  # 中间件
-│   │   ├── socket/      # WebSocket处理
-│   │   ├── services/    # AI服务
-│   │   └── db/          # 数据库
-│   └── package.json
-│
-├── deploy/          # 部署配置
+├── client/          # React 前端 (端口 30001)
+├── server/          # Node.js 后端 (端口 50001)
+├── start.bat        # 一键启动脚本
 └── README.md
 ```
 
@@ -91,6 +73,10 @@ cd client && npm run dev
 - ✅ AI 智能对话 (DEEPSEEK)
 
 ## 更新日志
+
+### v0.0.3
+- 修改端口号：前端 30001，后端 50001
+- 添加一键启动批处理文件 start.bat
 
 ### v0.0.2
 - 添加 AI 用户功能
