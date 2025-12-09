@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, BookOpen, PenTool, MoreHorizontal, FileText, Paperclip, Send, MessageSquare, Bot, LogOut } from 'lucide-react';
+import { Search, BookOpen, MoreHorizontal, FileText, Paperclip, Send, MessageSquare, Bot, LogOut, Users } from 'lucide-react';
 import { useAuthStore, useChatStore, useFriendsStore } from '../store';
 import { conversationsAPI, friendsAPI, aiAPI } from '../services/api';
 import { connectSocket, disconnectSocket, sendMessage, sendTyping } from '../socket';
@@ -238,6 +238,11 @@ export default function Chat() {
                         style={{ width: '16px', height: '16px', cursor: 'pointer', color: 'var(--text-muted)', marginRight: '0.5rem' }}
                         onClick={() => navigate('/search')}
                         title="搜索用户"
+                    />
+                    <Users
+                        style={{ width: '16px', height: '16px', cursor: 'pointer', color: 'var(--text-muted)', marginRight: '0.5rem' }}
+                        onClick={() => navigate('/friends')}
+                        title="好友管理"
                     />
                     <LogOut
                         style={{ width: '16px', height: '16px', cursor: 'pointer', color: 'var(--text-muted)' }}

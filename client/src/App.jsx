@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import SearchUsers from './pages/SearchUsers';
+import Friends from './pages/Friends';
 
 function PrivateRoute({ children }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -29,6 +30,14 @@ function App() {
         element={
           <PrivateRoute>
             <SearchUsers />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/friends"
+        element={
+          <PrivateRoute>
+            <Friends />
           </PrivateRoute>
         }
       />
