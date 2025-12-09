@@ -222,13 +222,23 @@ export default function Chat() {
 
                 {/* 用户信息面板 */}
                 <div className="user-panel">
-                    <div className="user-avatar">
+                    <div
+                        className="user-avatar"
+                        onClick={() => navigate('/profile')}
+                        style={{ cursor: 'pointer' }}
+                        title="编辑个人资料"
+                    >
                         {(user?.nickname || user?.username || 'U').charAt(0).toUpperCase()}
                     </div>
-                    <div className="user-info">
+                    <div className="user-info" onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}>
                         <div className="username">{user?.nickname || user?.username}</div>
                         <div className="status">在线</div>
                     </div>
+                    <Search
+                        style={{ width: '16px', height: '16px', cursor: 'pointer', color: 'var(--text-muted)', marginRight: '0.5rem' }}
+                        onClick={() => navigate('/search')}
+                        title="搜索用户"
+                    />
                     <LogOut
                         style={{ width: '16px', height: '16px', cursor: 'pointer', color: 'var(--text-muted)' }}
                         onClick={handleLogout}

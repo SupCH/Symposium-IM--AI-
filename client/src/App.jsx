@@ -3,6 +3,8 @@ import { useAuthStore } from './store';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Chat from './pages/Chat';
+import Profile from './pages/Profile';
+import SearchUsers from './pages/SearchUsers';
 
 function PrivateRoute({ children }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -14,6 +16,22 @@ function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/search"
+        element={
+          <PrivateRoute>
+            <SearchUsers />
+          </PrivateRoute>
+        }
+      />
       <Route
         path="/*"
         element={
