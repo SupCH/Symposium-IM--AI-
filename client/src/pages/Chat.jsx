@@ -13,7 +13,7 @@ export default function Chat() {
     const fileInputRef = useRef(null);
 
     const { user, logout } = useAuthStore();
-    const { conversations, activeConversationId, messages, setConversations, setActiveConversation, setMessages } = useChatStore();
+    const { conversations, activeConversationId, messages, typingUsers, setConversations, setActiveConversation, setMessages } = useChatStore();
     const { setFriends } = useFriendsStore();
 
     const navigate = useNavigate();
@@ -305,6 +305,11 @@ export default function Chat() {
                                             <span>编号 {msg.id}</span>
                                             <span>•</span>
                                             <span>{formatTime(msg.created_at)}</span>
+                                            {msg.sender_id === user?.id && (
+                                                <span style={{ marginLeft: '0.5rem', color: msg.is_read ? '#2e7d32' : 'var(--text-muted)' }}>
+                                                    {msg.is_read ? '✓✓ 已读' : '✓ 已发送'}
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="bubble">
                                             <span className="quote">"</span>
@@ -317,6 +322,18 @@ export default function Chat() {
                                         </div>
                                     </div>
                                 ))}
+
+                                {/* 输入中提示 */}
+                                {typingUsers[`${activeConversationId}-${activeConversation?.participant?.id}`] && (
+                                    <div style={{
+                                        padding: '0.5rem 1rem',
+                                        fontStyle: 'italic',
+                                        color: 'var(--text-muted)',
+                                        fontSize: '0.875rem'
+                                    }}>
+                                        {activeConversation?.participant?.nickname || '对方'} 正在输入...
+                                    </div>
+                                )}
                                 <div ref={messagesEndRef} />
                             </div>
                         </main>
